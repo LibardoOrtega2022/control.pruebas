@@ -553,3 +553,79 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+### .NET specific - Environment & Configuration ###
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Launch settings (user-specific)
+launchSettings.json
+Properties/launchSettings.json
+
+# User-specific settings
+*.user.xml
+*/.user/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# AppsSettings for specific environments (keep .json for tracking)
+appsettings.Production.json
+appsettings.Staging.json
+
+# Database files
+*.mdf
+*.ldf
+*.ndf
+*.log
+
+# Entity Framework Core
+Migrations/**/
+!Migrations/
+!Migrations/*.cs
+
+# Test Results
+TestResults/
+*.trx
+coverage/
+*.coverage
+
+### System Files ###
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.~*
+
+### NPM / Frontend (if using Node.js tools) ###
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+dist/
+build/
+
+### Additional VS Code ###
+.vscode-test/
+.vscode/.DS_Store
+
+### Misc ###
+*.bak
+*.tmp
+*.temp
+*.cache
+.cache/
+

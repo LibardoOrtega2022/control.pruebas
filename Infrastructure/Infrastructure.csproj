@@ -7,6 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Remove="Frontend\**" />
+        <EmbeddedResource Remove="Frontend\**" />
+        <None Remove="Frontend\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Dapper" Version="2.1.66" />
       <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
