@@ -16,11 +16,12 @@ var builder = WebApplication.CreateBuilder(args);
 SqlMapper.AddTypeHandler(new DapperDateTimeNullableHandler());
 
 // Agregar CORS para permitir comunicación Blazor Frontend -> API
+// Permitir dos puertos: 5088 (API) y 5089 (Frontend DevServer)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5098", "http://localhost:5099")
+        policy.WithOrigins("http://localhost:5088", "http://localhost:5089")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
