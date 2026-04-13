@@ -39,11 +39,21 @@ public class BookController : ControllerBase
     {
         try
         {
+            Console.WriteLine($"[BookController.CreateBook] Called");
+            Console.WriteLine($"[BookController.CreateBook] Title: {title}, Pages: {numberOfPages}, AuthorId: {authorId}");
+            Console.WriteLine($"[BookController.CreateBook] File received: {file?.FileName ?? "null"}, Size: {file?.Length ?? 0}");
+
             // Guardar imagen si existe
             string? coverImagePath = null;
             if (file != null)
             {
+                Console.WriteLine($"[BookController.CreateBook] Processing image upload");
                 coverImagePath = await imageService.SaveImageAsync(file, "uploads/books");
+                Console.WriteLine($"[BookController.CreateBook] Image saved at: {coverImagePath}");
+            }
+            else
+            {
+                Console.WriteLine($"[BookController.CreateBook] No file provided");
             }
 
             var request = new CreateBookRequest
@@ -57,22 +67,27 @@ public class BookController : ControllerBase
             };
 
             var result = await createBookDomain.CreateAsync(request, coverImagePath, ct);
+            Console.WriteLine($"[BookController.CreateBook] Book created successfully with ID: {result.Id}");
             return CreatedAtAction(nameof(GetBookById), new { id = result.Id }, result);
         }
         catch (KeyNotFoundException ex)
         {
+            Console.WriteLine($"[BookController.CreateBook] KeyNotFoundException: {ex.Message}");
             return NotFound(new { message = ex.Message });
         }
         catch (ArgumentException ex)
         {
+            Console.WriteLine($"[BookController.CreateBook] ArgumentException: {ex.Message}");
             return BadRequest(new { message = ex.Message });
         }
         catch (BadImageFormatException ex)
         {
+            Console.WriteLine($"[BookController.CreateBook] BadImageFormatException: {ex.Message}");
             return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[BookController.CreateBook] Exception: {ex.Message}\n{ex.StackTrace}");
             return StatusCode(500, new { message = "Error al crear libro", error = ex.Message });
         }
     }

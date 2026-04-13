@@ -90,13 +90,151 @@
     {
         <LoanForm Books="@books" IsEdit="false" OnSave="HandleSave" OnCancel="CloseForm" />
     }
+
+    @if (showDetails && selectedLoan != null)
+    {
+        <div class="modal-overlay" @onclick="CloseDetails">
+            <div class="modal-content" @onclick:stopPropagation>
+                <div class="modal-header">
+                    <h2>Detalles del Préstamo</h2>
+                    <button @onclick="CloseDetails" class="close-btn">✕</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="detail-row">
+                        <label>Libro:</label>
+                        <span>@selectedLoan.BookTitle</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Prestatario:</label>
+                        <span>@selectedLoan.BorrowerName</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Fecha de Préstamo:</label>
+                        <span>@selectedLoan.LoanDate.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Fecha de Devolución Prevista:</label>
+                        <span>@(selectedLoan.DueDate != default(DateTime) ? selectedLoan.DueDate.ToString("dd/MM/yyyy") : "No definida")</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Fecha de Devolución Real:</label>
+                        <span>@(selectedLoan.ReturnDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Estado:</label>
+                        <span class="@("badge badge-" + GetStatusBadgeClass(selectedLoan.Status))">
+                            @selectedLoan.Status
+                        </span>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button @onclick="CloseDetails" class="btn-secondary">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6c757d;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .detail-row label {
+        font-weight: bold;
+        color: #333;
+        min-width: 150px;
+    }
+
+    .detail-row span {
+        flex: 1;
+        text-align: right;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+</style>
 
 @code {
     private List<LoanModel>? loans;
     private List<BookModel>? books;
     private bool isLoading = false;
     private bool showForm = false;
+    private bool showDetails = false;
+    private LoanModel? selectedLoan;
     private int currentPage = 1;
     private int totalPages = 1;
     private bool showAlert = false;
@@ -192,7 +330,20 @@
 
     private void ViewDetails(LoanModel loan)
     {
-        // Podría abrir un modal con más detalles
+        selectedLoan = loan;
+        showDetails = true;
+        StateHasChanged();
+    }
+
+    private void CloseDetails()
+    {
+        showDetails = false;
+        selectedLoan = null;
+    }
+
+    private string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() == "active" ? "success" : "info";
     }
 
     private void CloseForm()
@@ -211,14 +362,6 @@
     {
         showAlert = false;
     }
-
-    private string GetStatusBadgeClass(string status) => status switch
-    {
-        "Active" => "warning",
-        "Returned" => "success",
-        "Overdue" => "danger",
-        _ => "info"
-    };
 }
 
 <style>

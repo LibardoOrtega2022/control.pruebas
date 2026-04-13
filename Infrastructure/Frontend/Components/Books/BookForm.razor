@@ -1,5 +1,6 @@
 @namespace Frontend.Components.Books
 @using Frontend.Models
+@using System.IO
 
 <div class="modal-overlay" @onclick="OnCancel">
     <div class="modal-content" @onclick:stopPropagation>
@@ -133,14 +134,22 @@
         {
             var file = files[0];
             selectedFileName = file.Name;
-            selectedImageStream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5MB
 
-            // Crear preview
-            var buffer = new byte[file.Size];
-            await selectedImageStream.ReadAsync(buffer);
-            var base64 = Convert.ToBase64String(buffer);
-            imagePreview = $"data:image/png;base64,{base64}";
-            selectedImageStream.Seek(0, System.IO.SeekOrigin.Begin);
+            // Leer el archivo a un MemoryStream que pueda reutilizarse
+            using (var browserStream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024)) // 5MB
+            {
+                var memoryStream = new MemoryStream();
+                await browserStream.CopyToAsync(memoryStream);
+                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                selectedImageStream = memoryStream;
+
+                // Crear preview
+                var buffer = new byte[memoryStream.Length];
+                await memoryStream.ReadAsync(buffer);
+                var base64 = Convert.ToBase64String(buffer);
+                imagePreview = $"data:image/png;base64,{base64}";
+                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+            }
         }
     }
 
