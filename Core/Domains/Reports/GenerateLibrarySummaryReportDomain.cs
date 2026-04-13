@@ -18,9 +18,9 @@ public class GenerateLibrarySummaryReportDomain(IReportQueries reportQueries)
 
         return new LibrarySummaryReportDto
         {
-            Top5AuthorsByPages = top5,
+            TopAuthors = top5,
             AuthorsWithoutBooks = withoutBooks,
-            AveragePages = avgPages,
+            AveragePagesPerBook = avgPages,
             TotalBooksByAuthor = totalBooks
         };
     }

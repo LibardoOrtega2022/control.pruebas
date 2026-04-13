@@ -24,14 +24,13 @@ public class ReportQueries(UnitOfWork unitOfWork) : IReportQueries
     ///      ORDER BY SUM(pages) DESC
     ///      LIMIT 5
     /// </summary>
-    public async Task<List<TopAuthorsReportDto>> GetTop5AuthorsByPagesAsync(CancellationToken ct)
+    public async Task<List<TopAuthorDto>> GetTop5AuthorsByPagesAsync(CancellationToken ct)
     {
         const string sql = @"
             SELECT TOP 5
                 a.Id as AuthorId,
                 CONCAT(a.Name, ' ', a.LastName) as AuthorName,
-                COALESCE(SUM(b.NumberOfPages), 0) as TotalPages,
-                COUNT(b.Id) as BookCount
+                COALESCE(SUM(b.NumberOfPages), 0) as TotalPages
             FROM Author a
             LEFT JOIN Books b ON a.Id = b.AuthorId AND b.IsDeleted = 0
             WHERE a.IsDeleted = 0
@@ -44,7 +43,7 @@ public class ReportQueries(UnitOfWork unitOfWork) : IReportQueries
             if (conn.State != System.Data.ConnectionState.Open)
                 conn.Open();
 
-            var result = await conn.QueryAsync<TopAuthorsReportDto>(sql);
+            var result = await conn.QueryAsync<TopAuthorDto>(sql);
             return result.ToList();
         }
         catch (Exception ex)
@@ -92,15 +91,12 @@ public class ReportQueries(UnitOfWork unitOfWork) : IReportQueries
     /// 
     /// ¿Por qué es eficiente?
     /// - AVG() lo calcula en BD (una sola operación)
-    /// - COUNT() lo hace en BD
-    /// - Resultado: 2 números, no 10.000 libros en memoria
+    /// - Resultado: 1 número, no 10.000 libros en memoria
     /// </summary>
-    public async Task<AveragePagesByBookDto> GetAveragePagesPerBookAsync(CancellationToken ct)
+    public async Task<decimal> GetAveragePagesPerBookAsync(CancellationToken ct)
     {
         const string sql = @"
-            SELECT 
-                COALESCE(CAST(AVG(CAST(NumberOfPages as DECIMAL(10,2))) AS DECIMAL(10,2)), 0) as AveragePages,
-                COUNT(*) as TotalBooks
+            SELECT COALESCE(CAST(AVG(CAST(NumberOfPages as DECIMAL(10,2))) AS DECIMAL(10,2)), 0)
             FROM Books
             WHERE IsDeleted = 0";
 
@@ -110,8 +106,8 @@ public class ReportQueries(UnitOfWork unitOfWork) : IReportQueries
             if (conn.State != System.Data.ConnectionState.Open)
                 conn.Open();
 
-            var result = await conn.QueryFirstOrDefaultAsync<AveragePagesByBookDto>(sql);
-            return result ?? new AveragePagesByBookDto { AveragePages = 0, TotalBooks = 0 };
+            var result = await conn.QueryFirstOrDefaultAsync<decimal>(sql);
+            return result;
         }
         catch (Exception ex)
         {
@@ -133,7 +129,7 @@ public class ReportQueries(UnitOfWork unitOfWork) : IReportQueries
             SELECT 
                 a.Id as AuthorId,
                 CONCAT(a.Name, ' ', a.LastName) as AuthorName,
-                COUNT(b.Id) as BookCount
+                COUNT(b.Id) as TotalBooks
             FROM Author a
             LEFT JOIN Books b ON a.Id = b.AuthorId AND b.IsDeleted = 0
             WHERE a.IsDeleted = 0

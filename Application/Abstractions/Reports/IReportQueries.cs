@@ -4,8 +4,8 @@ namespace Application.Abstractions.Reports;
 
 public interface IReportQueries
 {
-    Task<List<TopAuthorsReportDto>> GetTop5AuthorsByPagesAsync(CancellationToken ct);
+    Task<List<TopAuthorDto>> GetTop5AuthorsByPagesAsync(CancellationToken ct);
     Task<List<AuthorWithoutBooksDto>> GetAuthorsWithoutBooksAsync(CancellationToken ct);
-    Task<AveragePagesByBookDto> GetAveragePagesPerBookAsync(CancellationToken ct);
+    Task<decimal> GetAveragePagesPerBookAsync(CancellationToken ct);
     Task<List<TotalBooksByAuthorDto>> GetTotalBooksByAuthorAsync(CancellationToken ct);
 }
