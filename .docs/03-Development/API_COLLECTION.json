@@ -1,0 +1,307 @@
+{
+  "info": {
+    "_postman_id": "biblioteca-2026-04-13",
+    "name": "Biblioteca API",
+    "description": "Colección completa de endpoints para Sistema de Gestión de Biblioteca",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Autores",
+      "item": [
+        {
+          "name": "Crear Autor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gabriel\",\n  \"lastName\": \"García Márquez\",\n  \"birthDate\": \"1927-03-06\",\n  \"country\": \"Colombia\",\n  \"biography\": \"Escritor de Cien Años de Soledad\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5088/api/author",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "author"]
+            }
+          }
+        },
+        {
+          "name": "Listar Autores",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5088/api/author?page=1&pageSize=10&sortBy=CreatedDate DESC",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "author"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "pageSize", "value": "10"},
+                {"key": "sortBy", "value": "CreatedDate DESC"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Autor por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5088/api/author/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "author", "1"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Autor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gabriel\",\n  \"lastName\": \"García Márquez\",\n  \"birthDate\": \"1927-03-06\",\n  \"country\": \"Colombia\",\n  \"biography\": \"Escritor actualizado\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5088/api/author/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "author", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Autor",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:5088/api/author/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "author", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Libros",
+      "item": [
+        {
+          "name": "Crear Libro con Portada",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "title", "value": "Cien años de soledad", "type": "text"},
+                {"key": "numberOfPages", "value": "417", "type": "text"},
+                {"key": "authorId", "value": "1", "type": "text"},
+                {"key": "genre", "value": "Realismo mágico", "type": "text"},
+                {"key": "publishedDate", "value": "1967-05-30", "type": "text"},
+                {"key": "isbn", "value": "978-0060883287", "type": "text"},
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5088/api/book",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "book"]
+            }
+          },
+          "description": "Crear libro con portada (multipart/form-data)"
+        },
+        {
+          "name": "Listar Libros",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5088/api/book?page=1&pageSize=10&authorId=1&title=Cien",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "book"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "pageSize", "value": "10"},
+                {"key": "authorId", "value": "1"},
+                {"key": "title", "value": "Cien"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Libro por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5088/api/book/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "book", "1"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Libro",
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "title", "value": "Cien años de soledad (edición revisada)", "type": "text"},
+                {"key": "numberOfPages", "value": "420", "type": "text"},
+                {"key": "genre", "value": "Ficción", "type": "text"},
+                {"key": "publishedDate", "value": "1967-05-30", "type": "text"},
+                {"key": "isbn", "value": "978-0060883287", "type": "text"}
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5088/api/book/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "book", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Libro",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:5088/api/book/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "book", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Préstamos",
+      "item": [
+        {
+          "name": "Crear Préstamo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookId\": 1,\n  \"borrowerName\": \"Juan Pérez\",\n  \"loanDate\": \"2026-04-01\",\n  \"dueDate\": \"2026-04-15\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5088/api/loan",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "loan"]
+            }
+          }
+        },
+        {
+          "name": "Listar Préstamos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5088/api/loan?page=1&pageSize=10&status=Active",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "loan"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "pageSize", "value": "10"},
+                {"key": "status", "value": "Active"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Préstamo por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5088/api/loan/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "loan", "1"]
+            }
+          }
+        },
+        {
+          "name": "Devolver Libro (Préstamo)",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://localhost:5088/api/loan/1/return",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "loan", "1", "return"]
+            }
+          },
+          "description": "Marcar préstamo como devuelto"
+        }
+      ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        {
+          "name": "Obtener Resumen Biblioteca",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5088/api/report/summary",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5088",
+              "path": ["api", "report", "summary"]
+            }
+          },
+          "description": "Retorna: Top autores, promedio páginas, autores sin libros, total libros por autor"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5088",
+      "type": "string"
+    },
+    {
+      "key": "api_version",
+      "value": "v1",
+      "type": "string"
+    }
+  ]
+}
