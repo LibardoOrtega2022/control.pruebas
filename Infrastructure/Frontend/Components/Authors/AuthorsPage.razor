@@ -1,0 +1,297 @@
+@using Frontend.Services
+@using Frontend.Models
+@using Frontend.Components.Shared
+@inject AuthorService AuthorService
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Gestión de Autores</h1>
+        <button @onclick="OpenCreateForm" class="btn-primary">+ Nuevo Autor</button>
+    </div>
+
+    @if (showAlert && !string.IsNullOrEmpty(alertMessage))
+    {
+        <AlertComponent Message="@alertMessage" Type="@alertType" OnClose="CloseAlert" />
+    }
+
+    @if (isLoading)
+    {
+        <LoadingComponent />
+    }
+    else if (authors?.Any() == true)
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>País</th>
+                        <th>Fecha de Nacimiento</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var author in authors)
+                    {
+                        <tr>
+                            <td>@author.Name @author.LastName</td>
+                            <td>@(author.Country ?? "N/A")</td>
+                            <td>@(author.BirthDate?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                            <td>
+                                <button @onclick="(() => EditAuthor(author))" class="btn-small">✎ Editar</button>
+                                <button @onclick="(() => DeleteAuthor(author.Id))" class="btn-small btn-danger">🗑 Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            @if (currentPage > 1)
+            {
+                <button @onclick="(() => LoadAuthors(currentPage - 1))" class="btn-small">← Anterior</button>
+            }
+            <span>Página @currentPage de @totalPages</span>
+            @if (currentPage < totalPages)
+            {
+                <button @onclick="(() => LoadAuthors(currentPage + 1))" class="btn-small">Siguiente →</button>
+            }
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <EmptyComponent Title="Sin autores" Message="No hay autores registrados. ¡Crea uno nuevo!" />
+    }
+
+    @if (showForm)
+    {
+        <AuthorForm Author="@selectedAuthor" IsEdit="@isEditing" OnSave="HandleSave" OnCancel="CloseForm" />
+    }
+</div>
+
+@code {
+    private List<AuthorModel>? authors;
+    private bool isLoading = false;
+    private bool showForm = false;
+    private bool isEditing = false;
+    private AuthorModel? selectedAuthor;
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private bool showAlert = false;
+    private string alertMessage = string.Empty;
+    private string alertType = "info";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAuthors();
+    }
+
+    private async Task LoadAuthors(int page = 1)
+    {
+        try
+        {
+            isLoading = true;
+            var result = await AuthorService.GetAuthorsAsync(page, 10);
+            if (result != null)
+            {
+                authors = result.Data;
+                currentPage = result.Page;
+                totalPages = (int)Math.Ceiling((double)result.Count / result.PageSize);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OpenCreateForm()
+    {
+        selectedAuthor = new AuthorModel();
+        isEditing = false;
+        showForm = true;
+    }
+
+    private void EditAuthor(AuthorModel author)
+    {
+        selectedAuthor = author;
+        isEditing = true;
+        showForm = true;
+    }
+
+    private async Task HandleSave(AuthorModel author)
+    {
+        try
+        {
+            if (isEditing)
+            {
+                var request = new UpdateAuthorRequest
+                {
+                    Id = author.Id,
+                    Name = author.Name,
+                    LastName = author.LastName,
+                    BirthDate = author.BirthDate,
+                    Country = author.Country,
+                    Biography = author.Biography
+                };
+                await AuthorService.UpdateAuthorAsync(request);
+                ShowAlert("Autor actualizado correctamente", "success");
+            }
+            else
+            {
+                var request = new CreateAuthorRequest
+                {
+                    Name = author.Name,
+                    LastName = author.LastName,
+                    BirthDate = author.BirthDate,
+                    Country = author.Country,
+                    Biography = author.Biography
+                };
+                await AuthorService.CreateAuthorAsync(request);
+                ShowAlert("Autor creado correctamente", "success");
+            }
+            showForm = false;
+            await LoadAuthors();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+    }
+
+    private async Task DeleteAuthor(int id)
+    {
+        if (await JSInterop.ConfirmAsync($"¿Eliminar este autor?"))
+        {
+            try
+            {
+                await AuthorService.DeleteAuthorAsync(id);
+                ShowAlert("Autor eliminado correctamente", "success");
+                await LoadAuthors();
+            }
+            catch (Exception ex)
+            {
+                ShowAlert($"Error: {ex.Message}", "error");
+            }
+        }
+    }
+
+    private void CloseForm()
+    {
+        showForm = false;
+        selectedAuthor = null;
+    }
+
+    private void ShowAlert(string message, string type)
+    {
+        alertMessage = message;
+        alertType = type;
+        showAlert = true;
+    }
+
+    private void CloseAlert()
+    {
+        showAlert = false;
+    }
+
+    private static class JSInterop
+    {
+        public static async Task<bool> ConfirmAsync(string message)
+        {
+            return await Task.FromResult(true); // En JS real usaríamos JS interop
+        }
+    }
+}
+
+<style>
+    .page-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-small {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+        font-size: 12px;
+    }
+
+    .btn-small:hover {
+        background-color: #5a6268;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+    }
+
+    .table thead {
+        background-color: #f8f9fa;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+        margin-top: 20px;
+    }
+</style>

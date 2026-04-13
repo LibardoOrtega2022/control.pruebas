@@ -1,0 +1,200 @@
+﻿@page "/"
+
+<PageTitle>Biblioteca - Inicio</PageTitle>
+
+<div class="home-container">
+    <div class="header-section">
+        <h1>📚 Sistema de Gestión de Biblioteca</h1>
+        <p class="subtitle">Administra autores, libros y préstamos de forma eficiente</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">👤</div>
+            <h3>Gestión de Autores</h3>
+            <p>Crea, actualiza y elimina autores. Registra información personal y biografía.</p>
+            <NavLink href="autores" class="feature-link">Ir a Autores →</NavLink>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📖</div>
+            <h3>Catálogo de Libros</h3>
+            <p>Administra tu colección de libros con portadas, géneros y datos editoriales.</p>
+            <NavLink href="libros" class="feature-link">Ir a Libros →</NavLink>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📤</div>
+            <h3>Gestión de Préstamos</h3>
+            <p>Registra y controla los préstamos de libros. Valida devoluciones y plazos.</p>
+            <NavLink href="prestamos" class="feature-link">Ir a Préstamos →</NavLink>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Reportes y Análisis</h3>
+            <p>Visualiza estadísticas, top autores y análisis del catálogo.</p>
+            <NavLink href="reportes" class="feature-link">Ir a Reportes →</NavLink>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h2>¿Cómo usar el sistema?</h2>
+        <ol class="instructions">
+            <li>
+                <strong>Comienza con Autores:</strong> Registra los autores de tu biblioteca.
+            </li>
+            <li>
+                <strong>Agrega Libros:</strong> Por cada libro, selecciona el autor y carga la portada.
+            </li>
+            <li>
+                <strong>Controla Préstamos:</strong> Registra quién toma cada libro y cuándo lo devuelve.
+            </li>
+            <li>
+                <strong>Consulta Reportes:</strong> Revisa estadísticas y análisis de tu colección.
+            </li>
+        </ol>
+    </div>
+
+    <div class="features-list">
+        <h2>Características Principales</h2>
+        <ul>
+            <li>✅ CRUD completo para Autores, Libros y Préstamos</li>
+            <li>✅ Subida y visualización de portadas de libros</li>
+            <li>✅ Validación de reglas de negocio (1 préstamo activo por libro)</li>
+            <li>✅ Paginación y ordenamiento en listas</li>
+            <li>✅ Filtrado y búsqueda</li>
+            <li>✅ Estados de loading, error y vacío</li>
+            <li>✅ Reportes y análisis integrados</li>
+            <li>✅ Interfaz responsive y clara</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .home-container {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .header-section h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        margin: 0;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 50px;
+    }
+
+    .feature-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .feature-card h3 {
+        margin: 15px 0;
+        color: #333;
+    }
+
+    .feature-card p {
+        color: #666;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    .feature-link {
+        display: inline-block;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 10px 15px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+
+    .feature-link:hover {
+        background-color: #f0f0f0;
+    }
+
+    .info-section {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        padding: 30px;
+        border-radius: 4px;
+        margin-bottom: 40px;
+    }
+
+    .info-section h2 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .instructions {
+        margin: 20px 0;
+        padding-left: 20px;
+    }
+
+    .instructions li {
+        margin-bottom: 15px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .features-list {
+        background-color: #e7f3ff;
+        padding: 30px;
+        border-radius: 8px;
+    }
+
+    .features-list h2 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .features-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .features-list li {
+        padding: 10px 15px;
+        background-color: white;
+        border-radius: 4px;
+        color: #333;
+    }
+</style>

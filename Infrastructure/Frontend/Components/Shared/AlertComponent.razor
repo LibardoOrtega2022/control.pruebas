@@ -1,0 +1,67 @@
+@namespace Frontend.Components.Shared
+
+<div class="alert-container" style="background-color: @GetBackgroundColor(); color: @GetTextColor(); border-color: @GetBorderColor();">
+    <span>@Message</span>
+    <button @onclick="Close" class="close-btn">✕</button>
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Type { get; set; } = "info"; // info, success, warning, error
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    private string GetBackgroundColor() => Type switch
+    {
+        "success" => "#d4edda",
+        "error" => "#f8d7da",
+        "warning" => "#fff3cd",
+        _ => "#d1ecf1"
+    };
+
+    private string GetTextColor() => Type switch
+    {
+        "success" => "#155724",
+        "error" => "#721c24",
+        "warning" => "#856404",
+        _ => "#0c5460"
+    };
+
+    private string GetBorderColor() => Type switch
+    {
+        "success" => "#c3e6cb",
+        "error" => "#f5c6cb",
+        "warning" => "#ffeaa7",
+        _ => "#bee5eb"
+    };
+}
+
+<style>
+    .alert-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border: 1px solid;
+        border-radius: 4px;
+        margin-bottom: 16px;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 0;
+        margin-left: 10px;
+    }
+</style>

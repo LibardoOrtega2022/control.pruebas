@@ -1,0 +1,307 @@
+@namespace Frontend.Components.Books
+@using Frontend.Models
+
+<div class="modal-overlay" @onclick="OnCancel">
+    <div class="modal-content" @onclick:stopPropagation>
+        <div class="modal-header">
+            <h2>@(IsEdit ? "Editar Libro" : "Nuevo Libro")</h2>
+            <button @onclick="OnCancel" class="close-btn">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <form @onsubmit="HandleSubmit">
+                <div class="form-group">
+                    <label for="title">Título *</label>
+                    <input type="text" id="title" @bind="formData.Title" placeholder="Ej: Cien Años de Soledad" required />
+                    @if (!string.IsNullOrEmpty(validationErrors.GetValueOrDefault(nameof(formData.Title))))
+                    {
+                        <span class="error">@validationErrors[nameof(formData.Title)]</span>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="author">Autor *</label>
+                    <select id="author" @bind="formData.AuthorId" required>
+                        <option value="0">Selecciona un autor</option>
+                        @foreach (var author in Authors ?? new())
+                        {
+                            <option value="@author.Id">@author.Name @author.LastName</option>
+                        }
+                    </select>
+                    @if (!string.IsNullOrEmpty(validationErrors.GetValueOrDefault(nameof(formData.AuthorId))))
+                    {
+                        <span class="error">@validationErrors[nameof(formData.AuthorId)]</span>
+                    }
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pages">Número de Páginas *</label>
+                        <input type="number" id="pages" @bind="formData.NumberOfPages" min="1" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="genre">Género</label>
+                        <input type="text" id="genre" @bind="formData.Genre" placeholder="Ej: Ficción" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="published">Fecha de Publicación</label>
+                        <input type="date" id="published" value="@publishedDateString" @onchange="@((ChangeEventArgs e) => publishedDateString = e.Value?.ToString() ?? string.Empty)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="isbn">ISBN</label>
+                        <input type="text" id="isbn" @bind="formData.ISBN" placeholder="Ej: 978-0-12345-678-9" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Portada</label>
+                    <input type="file" id="image" accept="image/*" @onchange="HandleImageSelected" />
+                    @if (imagePreview != null)
+                    {
+                        <img src="@imagePreview" alt="Preview" class="image-preview" />
+                    }
+                    else if (IsEdit && !string.IsNullOrEmpty(Book?.CoverImagePath))
+                    {
+                        <img src="http://localhost:5088/@Book.CoverImagePath" alt="Current" class="image-preview" />
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" @onclick="OnCancel" class="btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn-primary">@(IsEdit ? "Actualizar" : "Crear")</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public BookModel? Book { get; set; }
+
+    [Parameter]
+    public List<AuthorModel>? Authors { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<(BookModel, Stream?, string?)> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private BookModel formData = new();
+    private Dictionary<string, string> validationErrors = new();
+    private string publishedDateString = string.Empty;
+    private string? imagePreview;
+    private Stream? selectedImageStream;
+    private string? selectedFileName;
+
+    protected override void OnParametersSet()
+    {
+        if (Book != null)
+        {
+            formData = new BookModel
+            {
+                Id = Book.Id,
+                Title = Book.Title,
+                NumberOfPages = Book.NumberOfPages,
+                AuthorId = Book.AuthorId,
+                Genre = Book.Genre,
+                PublishedDate = Book.PublishedDate,
+                ISBN = Book.ISBN,
+                CoverImagePath = Book.CoverImagePath
+            };
+
+            if (Book.PublishedDate.HasValue)
+            {
+                publishedDateString = Book.PublishedDate.Value.ToString("yyyy-MM-dd");
+            }
+        }
+    }
+
+    private async Task HandleImageSelected(ChangeEventArgs e)
+    {
+        var files = (e.Value as Microsoft.AspNetCore.Components.Forms.IBrowserFile[]) ?? Array.Empty<Microsoft.AspNetCore.Components.Forms.IBrowserFile>();
+        if (files.Length > 0)
+        {
+            var file = files[0];
+            selectedFileName = file.Name;
+            selectedImageStream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5MB
+
+            // Crear preview
+            var buffer = new byte[file.Size];
+            await selectedImageStream.ReadAsync(buffer);
+            var base64 = Convert.ToBase64String(buffer);
+            imagePreview = $"data:image/png;base64,{base64}";
+            selectedImageStream.Seek(0, System.IO.SeekOrigin.Begin);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        validationErrors.Clear();
+
+        if (string.IsNullOrWhiteSpace(formData.Title))
+            validationErrors[nameof(formData.Title)] = "El título es requerido";
+
+        if (formData.AuthorId <= 0)
+            validationErrors[nameof(formData.AuthorId)] = "Selecciona un autor";
+
+        if (formData.NumberOfPages <= 0)
+            validationErrors["Pages"] = "El número de páginas debe ser mayor a 0";
+
+        if (validationErrors.Any())
+            return;
+
+        if (!string.IsNullOrEmpty(publishedDateString) && DateTime.TryParse(publishedDateString, out var date))
+        {
+            formData.PublishedDate = date;
+        }
+
+        await OnSave.InvokeAsync((formData, selectedImageStream, selectedFileName));
+    }
+}
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6c757d;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    input[type="file"],
+    select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+
+    .error {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        height: auto;
+        margin-top: 10px;
+        border-radius: 4px;
+        max-height: 200px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+</style>

@@ -23,6 +23,8 @@ public sealed class UnitOfWork(AppDbContext db) : IUnitOfWork
 
     public async Task CommitAsync(CancellationToken ct)
     {
+        // BUG FIX: Guardar cambios de EF antes de hacer commit de la transacción
+        await Db.SaveChangesAsync(ct);
         if (Db.Database.CurrentTransaction is not null)
             await Db.Database.CurrentTransaction.CommitAsync(ct);
     }

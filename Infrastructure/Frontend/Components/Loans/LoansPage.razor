@@ -1,0 +1,343 @@
+@using Frontend.Services
+@using Frontend.Models
+@using Frontend.Components.Shared
+@inject LoanService LoanService
+@inject BookService BookService
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Gestión de Préstamos</h1>
+        <button @onclick="OpenCreateForm" class="btn-primary">+ Nuevo Préstamo</button>
+    </div>
+
+    @if (showAlert && !string.IsNullOrEmpty(alertMessage))
+    {
+        <AlertComponent Message="@alertMessage" Type="@alertType" OnClose="CloseAlert" />
+    }
+
+    <div class="filters">
+        <select @bind="filterStatus" @bind:event="onchange">
+            <option value="">Todos los estados</option>
+            <option value="Active">Activos</option>
+            <option value="Returned">Devueltos</option>
+            <option value="Overdue">Vencidos</option>
+        </select>
+        <button @onclick="(() => PerformFilter())" class="btn-small">🔍 Filtrar</button>
+    </div>
+
+    @if (isLoading)
+    {
+        <LoadingComponent />
+    }
+    else if (loans?.Any() == true)
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Prestatario</th>
+                        <th>Fecha Préstamo</th>
+                        <th>Fecha Devolución</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var loan in loans)
+                    {
+                        <tr class="@("loan-row-" + loan.Status.ToLower())">
+                            <td>@loan.BookTitle</td>
+                            <td>@loan.BorrowerName</td>
+                            <td>@loan.LoanDate.ToString("dd/MM/yyyy")</td>
+                            <td>@(loan.ReturnDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>
+                                <span class="@("badge badge-" + GetStatusBadgeClass(loan.Status))">
+                                    @loan.Status
+                                </span>
+                            </td>
+                            <td>
+                                @if (loan.Status == "Active")
+                                {
+                                    <button @onclick="(() => ReturnLoan(loan.Id))" class="btn-small">✓ Devolver</button>
+                                }
+                                <button @onclick="(() => ViewDetails(loan))" class="btn-small">👁 Ver</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            @if (currentPage > 1)
+            {
+                <button @onclick="(() => LoadLoans(currentPage - 1))" class="btn-small">← Anterior</button>
+            }
+            <span>Página @currentPage de @totalPages</span>
+            @if (currentPage < totalPages)
+            {
+                <button @onclick="(() => LoadLoans(currentPage + 1))" class="btn-small">Siguiente →</button>
+            }
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <EmptyComponent Title="Sin préstamos" Message="No hay préstamos registrados. ¡Crea uno nuevo!" />
+    }
+
+    @if (showForm)
+    {
+        <LoanForm Books="@books" IsEdit="false" OnSave="HandleSave" OnCancel="CloseForm" />
+    }
+</div>
+
+@code {
+    private List<LoanModel>? loans;
+    private List<BookModel>? books;
+    private bool isLoading = false;
+    private bool showForm = false;
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private bool showAlert = false;
+    private string alertMessage = string.Empty;
+    private string alertType = "info";
+    private string filterStatus = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+        await LoadLoans();
+    }
+
+    private async Task LoadBooks()
+    {
+        try
+        {
+            var result = await BookService.GetBooksAsync(1, 1000);
+            books = result?.Data ?? new();
+        }
+        catch { }
+    }
+
+    private async Task LoadLoans(int page = 1)
+    {
+        try
+        {
+            isLoading = true;
+            var result = await LoanService.GetLoansAsync(page, 10, string.IsNullOrEmpty(filterStatus) ? null : filterStatus);
+            if (result != null)
+            {
+                loans = result.Data;
+                currentPage = result.Page;
+                totalPages = (int)Math.Ceiling((double)result.Count / result.PageSize);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task PerformFilter()
+    {
+        currentPage = 1;
+        await LoadLoans();
+    }
+
+    private void OpenCreateForm()
+    {
+        showForm = true;
+    }
+
+    private async Task HandleSave(LoanModel loan)
+    {
+        try
+        {
+            var request = new CreateLoanRequest
+            {
+                BookId = loan.BookId,
+                BorrowerName = loan.BorrowerName,
+                LoanDate = loan.LoanDate,
+                DueDate = loan.DueDate
+            };
+            await LoanService.CreateLoanAsync(request);
+            ShowAlert("Préstamo creado correctamente", "success");
+            showForm = false;
+            await LoadLoans();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+    }
+
+    private async Task ReturnLoan(int id)
+    {
+        try
+        {
+            await LoanService.ReturnLoanAsync(id);
+            ShowAlert("Préstamo devuelto correctamente", "success");
+            await LoadLoans();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+    }
+
+    private void ViewDetails(LoanModel loan)
+    {
+        // Podría abrir un modal con más detalles
+    }
+
+    private void CloseForm()
+    {
+        showForm = false;
+    }
+
+    private void ShowAlert(string message, string type)
+    {
+        alertMessage = message;
+        alertType = type;
+        showAlert = true;
+    }
+
+    private void CloseAlert()
+    {
+        showAlert = false;
+    }
+
+    private string GetStatusBadgeClass(string status) => status switch
+    {
+        "Active" => "warning",
+        "Returned" => "success",
+        "Overdue" => "danger",
+        _ => "info"
+    };
+}
+
+<style>
+    .page-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .filters {
+        margin-bottom: 20px;
+    }
+
+    .filters select {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+    }
+
+    .table thead {
+        background-color: #f8f9fa;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    .badge-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .badge-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .btn-small {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-right: 5px;
+    }
+
+    .btn-small:hover {
+        background-color: #5a6268;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .loan-row-active {
+        background-color: #fffacd;
+    }
+</style>

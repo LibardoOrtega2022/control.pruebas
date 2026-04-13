@@ -1,0 +1,277 @@
+@using Frontend.Services
+@using Frontend.Models
+@using Frontend.Components.Shared
+@inject ReportService ReportService
+
+<div class="page-container">
+    <h1>Reportes y Análisis</h1>
+
+    @if (showAlert && !string.IsNullOrEmpty(alertMessage))
+    {
+        <AlertComponent Message="@alertMessage" Type="@alertType" OnClose="CloseAlert" />
+    }
+
+    @if (isLoading)
+    {
+        <LoadingComponent />
+    }
+    else if (report != null)
+    {
+        <div class="reports-grid">
+            <!-- Resumen General -->
+            <div class="card">
+                <h2>Resumen General</h2>
+                <div class="stat">
+                    <span class="label">Promedio Páginas por Libro:</span>
+                    <span class="value">@report.AveragePagesPerBook.ToString("F2")</span>
+                </div>
+            </div>
+
+            <!-- Top 5 Autores -->
+            <div class="card">
+                <h2>Top 5 Autores por Total de Páginas</h2>
+                @if (report.TopAuthors.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Autor</th>
+                                    <th>Total Páginas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var author in report.TopAuthors)
+                                {
+                                    <tr>
+                                        <td>@author.AuthorName</td>
+                                        <td>@author.TotalPages págs.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p>Sin datos</p>
+                }
+            </div>
+
+            <!-- Total Libros por Autor -->
+            <div class="card">
+                <h2>Total Libros por Autor</h2>
+                @if (report.TotalBooksByAuthor.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Autor</th>
+                                    <th>Total Libros</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var author in report.TotalBooksByAuthor)
+                                {
+                                    <tr>
+                                        <td>@author.AuthorName</td>
+                                        <td>@author.TotalBooks</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p>Sin datos</p>
+                }
+            </div>
+
+            <!-- Autores sin Libros -->
+            <div class="card">
+                <h2>Autores sin Libros</h2>
+                @if (report.AuthorsWithoutBooks.Any())
+                {
+                    <ul class="author-list">
+                        @foreach (var author in report.AuthorsWithoutBooks)
+                        {
+                            <li>@author.AuthorName</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>✓ Todos los autores tienen libros registrados</p>
+                }
+            </div>
+        </div>
+
+        <div class="refresh-section">
+            <button @onclick="RefreshReport" class="btn-refresh">🔄 Actualizar Reportes</button>
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <EmptyComponent Title="Sin reportes" Message="No hay datos disponibles para generar reportes." />
+    }
+</div>
+
+@code {
+    private ReportSummary? report;
+    private bool isLoading = false;
+    private bool showAlert = false;
+    private string alertMessage = string.Empty;
+    private string alertType = "info";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReport();
+    }
+
+    private async Task LoadReport()
+    {
+        try
+        {
+            isLoading = true;
+            report = await ReportService.GetSummaryAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task RefreshReport()
+    {
+        await LoadReport();
+        ShowAlert("Reportes actualizados correctamente", "success");
+    }
+
+    private void ShowAlert(string message, string type)
+    {
+        alertMessage = message;
+        alertType = type;
+        showAlert = true;
+    }
+
+    private void CloseAlert()
+    {
+        showAlert = false;
+    }
+}
+
+<style>
+    .page-container {
+        padding: 20px;
+    }
+
+    h1 {
+        margin-bottom: 30px;
+    }
+
+    .reports-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .stat .label {
+        font-weight: bold;
+        color: #666;
+    }
+
+    .stat .value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .table thead {
+        background-color: #f8f9fa;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 14px;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    .author-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .author-list li {
+        padding: 10px;
+        background-color: #f8f9fa;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        color: #495057;
+    }
+
+    .refresh-section {
+        text-align: center;
+    }
+
+    .btn-refresh {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-refresh:hover {
+        background-color: #218838;
+    }
+</style>

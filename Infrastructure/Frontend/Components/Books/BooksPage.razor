@@ -1,0 +1,395 @@
+@using Frontend.Services
+@using Frontend.Models
+@using Frontend.Components.Shared
+@inject BookService BookService
+@inject AuthorService AuthorService
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Gestión de Libros</h1>
+        <button @onclick="OpenCreateForm" class="btn-primary">+ Nuevo Libro</button>
+    </div>
+
+    @if (showAlert && !string.IsNullOrEmpty(alertMessage))
+    {
+        <AlertComponent Message="@alertMessage" Type="@alertType" OnClose="CloseAlert" />
+    }
+
+    <div class="filters">
+        <input type="text" @bind="filterTitle" @bind:event="oninput" placeholder="Buscar por título..." />
+        <select @bind="filterAuthorId" @bind:event="onchange">
+            <option value="">Todos los autores</option>
+            @foreach (var author in authors ?? new())
+            {
+                <option value="@author.Id">@author.Name @author.LastName</option>
+            }
+        </select>
+        <button @onclick="PerformSearch" class="btn-small">🔍 Buscar</button>
+    </div>
+
+    @if (isLoading)
+    {
+        <LoadingComponent />
+    }
+    else if (books?.Any() == true)
+    {
+        <div class="books-grid">
+            @foreach (var book in books)
+            {
+                <div class="book-card">
+                    @if (!string.IsNullOrEmpty(book.CoverImagePath))
+                    {
+                        <img src="http://localhost:5088/@book.CoverImagePath" alt="@book.Title" class="book-cover" />
+                    }
+                    else
+                    {
+                        <div class="book-cover-placeholder">📖</div>
+                    }
+
+                    <div class="book-info">
+                        <h3>@book.Title</h3>
+                        <p class="author">@book.AuthorName</p>
+                        <p class="pages">@book.NumberOfPages págs.</p>
+                        @if (!string.IsNullOrEmpty(book.Genre))
+                        {
+                            <p class="genre">@book.Genre</p>
+                        }
+
+                        <div class="book-actions">
+                            <button @onclick="(() => EditBook(book))" class="btn-small">✎ Editar</button>
+                            <button @onclick="(() => DeleteBook(book.Id))" class="btn-small btn-danger">🗑 Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="pagination">
+            @if (currentPage > 1)
+            {
+                <button @onclick="(() => LoadBooks(currentPage - 1))" class="btn-small">← Anterior</button>
+            }
+            <span>Página @currentPage de @totalPages</span>
+            @if (currentPage < totalPages)
+            {
+                <button @onclick="(() => LoadBooks(currentPage + 1))" class="btn-small">Siguiente →</button>
+            }
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <EmptyComponent Title="Sin libros" Message="No hay libros registrados. ¡Crea uno nuevo!" />
+    }
+
+    @if (showForm)
+    {
+        <BookForm Book="@selectedBook" Authors="@authors" IsEdit="@isEditing" OnSave="@(async (tuple) => await HandleSave(tuple.Item1, tuple.Item2, tuple.Item3))" OnCancel="CloseForm" />
+    }
+</div>
+
+@code {
+    private List<BookModel>? books;
+    private List<AuthorModel>? authors;
+    private bool isLoading = false;
+    private bool showForm = false;
+    private bool isEditing = false;
+    private BookModel? selectedBook;
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private bool showAlert = false;
+    private string alertMessage = string.Empty;
+    private string alertType = "info";
+    private string filterTitle = string.Empty;
+    private string filterAuthorId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAuthors();
+        await LoadBooks();
+    }
+
+    private async Task LoadAuthors()
+    {
+        try
+        {
+            var result = await AuthorService.GetAuthorsAsync(1, 100);
+            authors = result?.Data ?? new();
+        }
+        catch { }
+    }
+
+    private async Task LoadBooks(int page = 1)
+    {
+        try
+        {
+            isLoading = true;
+            int? authorId = string.IsNullOrEmpty(filterAuthorId) ? null : int.Parse(filterAuthorId);
+            var result = await BookService.GetBooksAsync(page, 10, authorId, filterTitle);
+            if (result != null)
+            {
+                books = result.Data;
+                currentPage = result.Page;
+                totalPages = (int)Math.Ceiling((double)result.Count / result.PageSize);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task PerformSearch()
+    {
+        currentPage = 1;
+        await LoadBooks();
+    }
+
+    private void OpenCreateForm()
+    {
+        selectedBook = new BookModel { AuthorId = string.IsNullOrEmpty(filterAuthorId) ? 0 : int.Parse(filterAuthorId) };
+        isEditing = false;
+        showForm = true;
+    }
+
+    private void EditBook(BookModel book)
+    {
+        selectedBook = book;
+        isEditing = true;
+        showForm = true;
+    }
+
+    private async Task HandleSave(BookModel book, Stream? imageStream, string? fileName)
+    {
+        try
+        {
+            if (isEditing)
+            {
+                var request = new UpdateBookRequest
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    NumberOfPages = book.NumberOfPages,
+                    AuthorId = book.AuthorId,
+                    Genre = book.Genre,
+                    PublishedDate = book.PublishedDate,
+                    ISBN = book.ISBN
+                };
+                await BookService.UpdateBookAsync(request, imageStream, fileName);
+                ShowAlert("Libro actualizado correctamente", "success");
+            }
+            else
+            {
+                var request = new CreateBookRequest
+                {
+                    Title = book.Title,
+                    NumberOfPages = book.NumberOfPages,
+                    AuthorId = book.AuthorId,
+                    Genre = book.Genre,
+                    PublishedDate = book.PublishedDate,
+                    ISBN = book.ISBN
+                };
+                await BookService.CreateBookAsync(request, imageStream, fileName);
+                ShowAlert("Libro creado correctamente", "success");
+            }
+            showForm = false;
+            await LoadBooks();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "error");
+        }
+    }
+
+    private async Task DeleteBook(int id)
+    {
+        // Confirmación simple
+        var book = books?.FirstOrDefault(b => b.Id == id);
+        if (book != null)
+        {
+            try
+            {
+                await BookService.DeleteBookAsync(id);
+                ShowAlert("Libro eliminado correctamente", "success");
+                await LoadBooks();
+            }
+            catch (Exception ex)
+            {
+                ShowAlert($"Error: {ex.Message}", "error");
+            }
+        }
+    }
+
+    private void CloseForm()
+    {
+        showForm = false;
+        selectedBook = null;
+    }
+
+    private void ShowAlert(string message, string type)
+    {
+        alertMessage = message;
+        alertType = type;
+        showAlert = true;
+    }
+
+    private void CloseAlert()
+    {
+        showAlert = false;
+    }
+}
+
+<style>
+    .page-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .filters input,
+    .filters select {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        flex: 1;
+    }
+
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .book-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .book-cover {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+    }
+
+    .book-cover-placeholder {
+        width: 100%;
+        height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        background-color: #f8f9fa;
+    }
+
+    .book-info {
+        padding: 15px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .book-info h3 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .author {
+        font-size: 12px;
+        color: #6c757d;
+        margin: 5px 0;
+    }
+
+    .pages {
+        font-size: 12px;
+        color: #6c757d;
+        margin: 5px 0;
+    }
+
+    .genre {
+        font-size: 11px;
+        background-color: #e9ecef;
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        color: #495057;
+        margin: 5px 0;
+    }
+
+    .book-actions {
+        display: flex;
+        gap: 5px;
+        margin-top: auto;
+    }
+
+    .btn-small {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        flex: 1;
+    }
+
+    .btn-small:hover {
+        background-color: #5a6268;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+        margin-top: 20px;
+    }
+</style>
+

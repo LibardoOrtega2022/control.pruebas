@@ -1,0 +1,238 @@
+@namespace Frontend.Components.Loans
+@using Frontend.Models
+
+<div class="modal-overlay" @onclick="OnCancel">
+    <div class="modal-content" @onclick:stopPropagation>
+        <div class="modal-header">
+            <h2>Nuevo Préstamo</h2>
+            <button @onclick="OnCancel" class="close-btn">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <form @onsubmit="HandleSubmit">
+                <div class="form-group">
+                    <label for="book">Libro *</label>
+                    <select id="book" @bind="formData.BookId" required>
+                        <option value="0">Selecciona un libro</option>
+                        @foreach (var book in Books ?? new())
+                        {
+                            <option value="@book.Id">@book.Title - @book.AuthorName</option>
+                        }
+                    </select>
+                    @if (!string.IsNullOrEmpty(validationErrors.GetValueOrDefault(nameof(formData.BookId))))
+                    {
+                        <span class="error">@validationErrors[nameof(formData.BookId)]</span>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="borrower">Nombre del Prestatario *</label>
+                    <input type="text" id="borrower" @bind="formData.BorrowerName" placeholder="Ej: Juan Pérez" required />
+                    @if (!string.IsNullOrEmpty(validationErrors.GetValueOrDefault(nameof(formData.BorrowerName))))
+                    {
+                        <span class="error">@validationErrors[nameof(formData.BorrowerName)]</span>
+                    }
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="loanDate">Fecha de Préstamo *</label>
+                        <input type="date" id="loanDate" value="@loanDateString" @onchange="@((ChangeEventArgs e) => loanDateString = e.Value?.ToString() ?? string.Empty)" required />
+                        @if (!string.IsNullOrEmpty(validationErrors.GetValueOrDefault("loanDate")))
+                        {
+                            <span class="error">@validationErrors["loanDate"]</span>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dueDate">Fecha de Devolución *</label>
+                        <input type="date" id="dueDate" value="@dueDateString" @onchange="@((ChangeEventArgs e) => dueDateString = e.Value?.ToString() ?? string.Empty)" required />
+                        @if (!string.IsNullOrEmpty(validationErrors.GetValueOrDefault("dueDate")))
+                        {
+                            <span class="error">@validationErrors["dueDate"]</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" @onclick="OnCancel" class="btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Préstamo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<BookModel>? Books { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<LoanModel> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private LoanModel formData = new() { LoanDate = DateTime.Today, DueDate = DateTime.Today.AddDays(14) };
+    private Dictionary<string, string> validationErrors = new();
+    private string loanDateString = DateTime.Today.ToString("yyyy-MM-dd");
+    private string dueDateString = DateTime.Today.AddDays(14).ToString("yyyy-MM-dd");
+
+    private async Task HandleSubmit()
+    {
+        validationErrors.Clear();
+
+        if (formData.BookId <= 0)
+            validationErrors[nameof(formData.BookId)] = "Selecciona un libro";
+
+        if (string.IsNullOrWhiteSpace(formData.BorrowerName))
+            validationErrors[nameof(formData.BorrowerName)] = "El nombre del prestatario es requerido";
+
+        if (DateTime.TryParse(loanDateString, out var loanDate))
+            formData.LoanDate = loanDate;
+        else
+            validationErrors["loanDate"] = "Fecha de préstamo inválida";
+
+        if (DateTime.TryParse(dueDateString, out var dueDate))
+            formData.DueDate = dueDate;
+        else
+            validationErrors["dueDate"] = "Fecha de devolución inválida";
+
+        if (formData.LoanDate >= formData.DueDate)
+            validationErrors["dueDate"] = "La fecha de devolución debe ser posterior a la de préstamo";
+
+        if (validationErrors.Any())
+            return;
+
+        await OnSave.InvokeAsync(formData);
+    }
+}
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6c757d;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+
+    .error {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+</style>

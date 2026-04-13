@@ -1,0 +1,58 @@
+@namespace Frontend.Components.Shared
+
+<div class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h3>Error</h3>
+    <p>@Message</p>
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = "Ocurrió un error. Intenta nuevamente.";
+
+    [Parameter]
+    public EventCallback OnRetry { get; set; }
+}
+
+<style>
+    .error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        color: #856404;
+    }
+
+    .error-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        margin-bottom: 10px;
+        color: #856404;
+    }
+
+    p {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .btn-retry {
+        background-color: #ffc107;
+        color: #000;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-retry:hover {
+        background-color: #ffb300;
+    }
+</style>
