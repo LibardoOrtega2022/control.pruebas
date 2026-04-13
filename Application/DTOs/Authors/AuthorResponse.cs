@@ -1,6 +1,6 @@
-﻿namespace Application.Entities;
+namespace Application.DTOs.Authors;
 
-public class AuthorEntity
+public class AuthorResponse
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -10,7 +10,5 @@ public class AuthorEntity
     public string Biography { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
     public DateTime? UpdatedDate { get; set; }
-    public bool IsDeleted { get; set; } = false;
-    
-    public ICollection<BookEntity> Books { get; set; } = new List<BookEntity>();
+    public int BookCount { get; set; }
 }
