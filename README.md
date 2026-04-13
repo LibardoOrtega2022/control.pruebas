@@ -18,12 +18,12 @@ cd Infrastructure && dotnet ef database update && cd ..
 # 3. Ejecutar backend (puerto 5088)
 cd Api && dotnet run
 
-# 4. En otra terminal: ejecutar frontend (puerto 5098)  
+# 4. En otra terminal: ejecutar frontend (puerto 5089)  
 cd Frontend && dotnet run
 ```
 
 **Entonces ingresa a:**
-- 🌐 Frontend: http://localhost:5098
+- 🌐 Frontend: http://localhost:5089
 - 🔌 API Swagger: http://localhost:5088/swagger/index.html
 
 ---
@@ -282,7 +282,7 @@ Estructura:
 .\run_all.ps1    # Run everything
 ```
 
-**Luego abre**: http://localhost:5098
+**Luego abre**: http://localhost:5089
 
 **Documentación rápida:**
 - 🚀 [START_HERE.txt](./START_HERE.txt) - Visual + quick instructions
@@ -497,7 +497,7 @@ dotnet run
 # Terminal 2 - Frontend (Blazor)
 cd Infrastructure\Frontend
 dotnet run
-# Escuchar en: http://localhost:5098
+# Escuchar en: http://localhost:5089
 ```
 
 ### 🎨 Opción 3: Visual Studio 2022
@@ -511,7 +511,7 @@ dotnet run
 
 **Resultado:**
 - API abierto en `http://localhost:5088`
-- Frontend abierto en `http://localhost:5098`
+- Frontend abierto en `http://localhost:5089`
 
 ### 📱 Opción 4: VS Code
 

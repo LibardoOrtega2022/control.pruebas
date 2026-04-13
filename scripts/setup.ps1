@@ -122,7 +122,7 @@ Write-Host ""
 Write-Host "2. FRONTEND BLAZOR (en otra terminal):" -ForegroundColor Yellow
 Write-Host "   cd Infrastructure\Frontend" -ForegroundColor Gray
 Write-Host "   dotnet run" -ForegroundColor Gray
-Write-Host "   URL: http://localhost:5098" -ForegroundColor Cyan
+Write-Host "   URL: http://localhost:5089" -ForegroundColor Cyan
 
 Write-Host ""
 Write-Host "Alternativa rapida - Usa los scripts:" -ForegroundColor Cyan

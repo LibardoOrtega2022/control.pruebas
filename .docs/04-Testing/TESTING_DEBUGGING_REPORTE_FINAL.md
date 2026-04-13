@@ -207,7 +207,7 @@ Content: HTML (Swagger UI Interface)
 
 #### Test 2.1: Frontend Page Load
 ```
-URL: http://localhost:5098/
+URL: http://localhost:5089/
 Result: ✅ PASS
 - Page loads successfully
 - Navbar visible with menu items (Inicio, Autores, Libros, Préstamos, Reportes)
@@ -347,7 +347,7 @@ Todos los bugs críticos han sido identificados y arreglados. El backend API y f
 
 ### Checklist Final
 - ✅ Backend API corriendo en http://localhost:5088
-- ✅ Frontend Blazor corriendo en http://localhost:5098  
+- ✅ Frontend Blazor corriendo en http://localhost:5089  
 - ✅ Swagger UI disponible en http://localhost:5088/swagger
 - ✅ Base de datos con datos de prueba
 - ✅ CRUD operations verificadas

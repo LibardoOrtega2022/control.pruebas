@@ -5,7 +5,7 @@
 **Patrón:** Clean Architecture + Domain Driven Design  
 **Stack:** .NET 10, EF Core, Dapper, Blazor WASM  
 **Base de Datos:** SQL Server LocalDB  
-**Deployment:** HTTP (localhost:5088 API, localhost:5098 Frontend)
+**Deployment:** HTTP (localhost:5088 API, localhost:5089 Frontend)
 
 ---
 

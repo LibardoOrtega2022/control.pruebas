@@ -72,7 +72,7 @@ dotnet run
 
 **Esperado:**
 ```
-Now listening on: http://localhost:5098
+Now listening on: http://localhost:5089
 Application started
 ```
 
@@ -84,7 +84,7 @@ Application started
 
 | Componente | URL | Descripción |
 |-----------|-----|-------------|
-| 🌐 **Frontend** | http://localhost:5098 | Interfaz Blazor WebAssembly |
+| 🌐 **Frontend** | http://localhost:5089 | Interfaz Blazor WebAssembly |
 | 🔌 **API Backend** | http://localhost:5088/api | REST API |
 | 📖 **Swagger UI** | http://localhost:5088/swagger | Documentación interactiva |
 
@@ -166,7 +166,7 @@ sqllocaldb info
 # o descarga: https://learn.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb
 ```
 
-### ❌ Puerto 5088 o 5098 en uso
+### ❌ Puerto 5088 o 5089 en uso
 
 ```bash
 # Usa el script con puerto custom
@@ -234,7 +234,7 @@ dotnet run
 - [ ] SQL Server LocalDB disponible (`sqllocaldb info`)
 - [ ] Proyecto compilado sin errores (`dotnet build`)
 - [ ] API corriendo en http://localhost:5088
-- [ ] Frontend corriendo en http://localhost:5098
+- [ ] Frontend corriendo en http://localhost:5089
 - [ ] Swagger accesible en http://localhost:5088/swagger
 - [ ] Frontend carga con navbar visible
 - [ ] API responde a GET /api/author

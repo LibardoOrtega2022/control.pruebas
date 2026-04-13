@@ -9,7 +9,7 @@
 .\run_all.ps1    # Run everything
 ```
 
-**Luego abre**: http://localhost:5098
+**Luego abre**: http://localhost:5089
 
 **Documentación rápida:**
 - 🚀 [START_HERE.txt](./START_HERE.txt) - Visual + quick instructions
@@ -224,7 +224,7 @@ dotnet run
 # Terminal 2 - Frontend (Blazor)
 cd Infrastructure\Frontend
 dotnet run
-# Escuchar en: http://localhost:5098
+# Escuchar en: http://localhost:5089
 ```
 
 ### 🎨 Opción 3: Visual Studio 2022
@@ -238,7 +238,7 @@ dotnet run
 
 **Resultado:**
 - API abierto en `http://localhost:5088`
-- Frontend abierto en `http://localhost:5098`
+- Frontend abierto en `http://localhost:5089`
 
 ### 📱 Opción 4: VS Code
 

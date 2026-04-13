@@ -300,7 +300,7 @@ Loans:
 Reports:
   GET    /api/report/summary           [Analytics dashboard]
 
-FRONTEND (running on localhost:5098):
+FRONTEND (running on localhost:5089):
   GET    /                              [Home page]
   GET    /authors                       [Authors CRUD]
   GET    /books                         [Books CRUD]
@@ -457,7 +457,7 @@ WASTE: ~27 files (~320 KB)
 # Access
 Backend API:     http://localhost:5088
  Swagger UI:     http://localhost:5088/swagger
-Frontend UI:     http://localhost:5098
+Frontend UI:     http://localhost:5089
 ```
 
 ---

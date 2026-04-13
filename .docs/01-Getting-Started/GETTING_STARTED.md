@@ -66,7 +66,7 @@ dotnet run
 
 | Componente | URL |
 |-----------|-----|
-| **Frontend** | http://localhost:5098 |
+| **Frontend** | http://localhost:5089 |
 | **API** | http://localhost:5088 |
 | **Documentación** | http://localhost:5088/swagger |
 

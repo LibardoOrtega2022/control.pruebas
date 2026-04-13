@@ -280,7 +280,7 @@ Root Directory (6 configuration files):
 ├── Api/appsettings.Development.json   [API: Dev overrides]
 ├── Api/Properties/launchSettings.json [API: Port 5088]
 ├── Infrastructure/Frontend/
-│   └── Properties/launchSettings.json [Frontend: Port 5098]
+│   └── Properties/launchSettings.json [Frontend: Port 5089]
 ```
 
 **Key Connection Points**:
@@ -644,7 +644,7 @@ Program.cs:
   ✅ Blazor WASM bootstrap configured
   
 Launch Settings:
-  ✅ Frontend: http://localhost:5098
+  ✅ Frontend: http://localhost:5089
   ✅ HTTPS: https://localhost:7098
 ```
 

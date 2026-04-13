@@ -29,13 +29,13 @@
    $ cd Api
    $ dotnet run
 
-4. En otra terminal, ejecutar frontend (puerto 5098):
+4. En otra terminal, ejecutar frontend (puerto 5089):
    $ cd ../Frontend
    $ dotnet run
 
 5. Acceder:
    • API Swagger: http://localhost:5088/swagger/index.html
-   • Frontend: http://localhost:5098
+   • Frontend: http://localhost:5089
 
 ================================================================================
                       📚 ESTRUCTURA DEL PROYECTO

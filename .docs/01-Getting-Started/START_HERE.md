@@ -38,7 +38,7 @@
 
 🚀 URLS IMPORTANTES (una vez ejecutando):
 
-   Frontend:  http://localhost:5098
+   Frontend:  http://localhost:5089
    API:       http://localhost:5088
    Swagger:   http://localhost:5088/swagger
 

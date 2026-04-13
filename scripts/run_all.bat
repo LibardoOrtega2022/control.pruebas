@@ -44,7 +44,7 @@ echo ║   Ambos servicios iniciados ✅         ║
 echo ╚════════════════════════════════════════╝
 echo.
 echo 📍 URLs disponibles:
-echo    Frontend:  http://localhost:5098
+echo    Frontend:  http://localhost:5089
 echo    API:       http://localhost:5088
 echo    Swagger:   http://localhost:5088/swagger
 echo.

@@ -20,7 +20,7 @@ if errorlevel 1 (
 
 echo.
 echo 🚀 Iniciando Frontend Blazor...
-echo 📍 URL: http://localhost:5098
+echo 📍 URL: http://localhost:5089
 echo.
 echo Presiona Ctrl+C para detener
 echo 💡 Asegurate que en otra terminal este corriendo: run_api.bat

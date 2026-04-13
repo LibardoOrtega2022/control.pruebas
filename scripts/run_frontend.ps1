@@ -1,6 +1,6 @@
 # Script para ejecutar Frontend Blazor
 # Uso: .\run_frontend.ps1
-# Descripción: Compila y ejecuta el frontend en http://localhost:5098
+# Descripción: Compila y ejecuta el frontend en http://localhost:5089
 
 Write-Host ""
 Write-Host "BIBLIOTECA - Frontend Blazor" -ForegroundColor Cyan
@@ -34,7 +34,7 @@ catch {
 
 Write-Host ""
 Write-Host "Iniciando Frontend Blazor..." -ForegroundColor Green
-Write-Host "URL: http://localhost:5098" -ForegroundColor Cyan
+Write-Host "URL: http://localhost:5089" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Presiona Ctrl+C para detener" -ForegroundColor Yellow
 Write-Host "Asegurate que en otra terminal este corriendo: .\run_api.ps1" -ForegroundColor Gray

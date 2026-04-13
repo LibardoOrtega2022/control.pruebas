@@ -85,7 +85,7 @@ run_all.bat
 
 ✅ Esto abre 2 ventanas automáticamente:
 - Ventana 1: API Backend (http://localhost:5088)
-- Ventana 2: Frontend Blazor (http://localhost:5098)
+- Ventana 2: Frontend Blazor (http://localhost:5089)
 
 #### Opción B: Por Separado (en 2 terminales)
 
@@ -133,7 +133,7 @@ Una vez ejecutando, accede desde cualquier navegador:
 
 | Componente | URL | Descripción |
 |-----------|-----|-------------|
-| **Frontend** | http://localhost:5098 | Interfaz de usuario (Blazor WASM) |
+| **Frontend** | http://localhost:5089 | Interfaz de usuario (Blazor WASM) |
 | **API Backend** | http://localhost:5088 | REST API endpoints |
 | **Swagger UI** | http://localhost:5088/swagger | Documentación interactiva |
 | **Swagger JSON** | http://localhost:5088/swagger/v1/swagger.json | Especificación OpenAPI |
@@ -144,7 +144,7 @@ Una vez ejecutando, accede desde cualquier navegador:
 
 ### Paso 1: Frontend Cargó
 
-Deberías ver en http://localhost:5098:
+Deberías ver en http://localhost:5089:
 ```
 Biblioteca (logo)
 ├── Inicio
@@ -192,7 +192,7 @@ Deberías ver interfaz de Swagger con todos los endpoints documentados.
    ```
 
 3. **Abrir aplicación:**
-   - Frontend: http://localhost:5098
+   - Frontend: http://localhost:5089
    - Swagger API: http://localhost:5088/swagger
 
 4. **Detener:**
@@ -276,7 +276,7 @@ run_all.ps1 / run_all.bat
     │   └─ http://localhost:5088
     │
     └─ Terminal 2: cd Infrastructure\Frontend && dotnet run
-        └─ http://localhost:5098
+        └─ http://localhost:5089
 ```
 
 ---
@@ -335,7 +335,7 @@ dotnet run --no-build
 Sistema completamente funcional en 3 pasos:
 1. `.\setup.ps1`
 2. `.\run_all.ps1`
-3. Abre http://localhost:5098
+3. Abre http://localhost:5089
 
 **¡Disfruta!** 🚀
 

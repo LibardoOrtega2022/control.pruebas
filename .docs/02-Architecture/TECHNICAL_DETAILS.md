@@ -13,14 +13,14 @@ Error: Error al obtener autores: TypeError: Failed to fetch
 
 En consola del navegador (F12):
 Access to fetch at 'http://localhost:5088/api/author?page=1&pageSize=10' 
-from origin 'http://localhost:5098' has been blocked by CORS policy: 
+from origin 'http://localhost:5089' has been blocked by CORS policy: 
 No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ```
 
 ### ¿Qué Significaba?
 
 EL NAVEGADOR BLOQUEÓ LA COMUNICACIÓN entre:
-- **Frontend** (Blazor en `http://localhost:5098`)
+- **Frontend** (Blazor en `http://localhost:5089`)
 - **Backend API** (en `http://localhost:5088`)
 
 ---
@@ -35,18 +35,18 @@ Es una **política de seguridad del navegador**.
 ### El Escenario
 
 ```
-Navegador ejecutando en:  http://localhost:5098
+Navegador ejecutando en:  http://localhost:5089
 Intenta conectar a:       http://localhost:5088
 
 Navegador dice:
-"Espera... ¿5098 quiere hablar con 5088? 
+"Espera... ¿5089 quiere hablar con 5088? 
 No tengo permiso. ¡BLOQUEADO!"
 ```
 
 ### Por Qué el Navegador Bloquea
 
 El navegador **SIEMPRE BLOQUEA** requests que vienen de:
-- Diferentes **puertos** (5098 vs 5088)
+- Diferentes **puertos** (5089 vs 5088)
 - Diferentes **dominios** (app.com vs api.com)
 - Diferentes **protocolos** (http vs https)
 
@@ -72,7 +72,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5098", "http://localhost:5099")  // Puertos permitidos
+        policy.WithOrigins("http://localhost:5088", "http://localhost:5089")  // Puertos permitidos
               .AllowAnyMethod()                                               // GET, POST, PUT, DELETE
               .AllowAnyHeader()                                               // Headers custom
               .AllowCredentials();                                            // Cookies/Auth
@@ -84,8 +84,8 @@ builder.Services.AddControllers();
 
 **¿Qué hace?**
 - Define una **política CORS** llamada `"AllowBlazor"`
-- Permite requests desde `localhost:5098` (Frontend)
-- Permite requests desde `localhost:5099` (alternativo)
+- Permite requests desde `localhost:5089` (Frontend)
+- Permite requests desde `localhost:5089` (Frontend)
 - Permite todos los HTTP methods
 - Permite todos los headers
 
@@ -121,7 +121,7 @@ app.MapControllers();
 
 ```
 Frontend                          Backend API
-http://localhost:5098             http://localhost:5088
+http://localhost:5089             http://localhost:5088
 
 [Blazor App]
     |
@@ -144,7 +144,7 @@ http://localhost:5098             http://localhost:5088
 
 ```
 Frontend                          Backend API
-http://localhost:5098             http://localhost:5088
+http://localhost:5089             http://localhost:5088
 
 [Blazor App]
     |
@@ -154,7 +154,7 @@ http://localhost:5098             http://localhost:5088
        "¿CORS en el backend?"
        
        Backend responde CON CORS headers:
-       Access-Control-Allow-Origin: http://localhost:5098
+       Access-Control-Allow-Origin: http://localhost:5089
        Access-Control-Allow-Methods: GET, POST, PUT, DELETE
        Access-Control-Allow-Headers: *
        
@@ -183,7 +183,7 @@ await AuthorService.GetAuthorsAsync();
 GET http://localhost:5088/api/author?page=1&pageSize=10
 
 Headers:
-- Origin: http://localhost:5098  ← Desde dónde viene la request
+- Origin: http://localhost:5089  ← Desde dónde viene la request
 ```
 
 ---
@@ -195,7 +195,7 @@ Headers:
 app.UseCors("AllowBlazor");  // ← Valida origen
 
 // Backend pregunta:
-"¿Es http://localhost:5098 permitido?"
+"¿Es http://localhost:5089 permitido?"
 Respuesta: SÍ (configurado en AddCors)
 ```
 
@@ -207,7 +207,7 @@ Respuesta: SÍ (configurado en AddCors)
 200 OK
 
 Headers:
-Access-Control-Allow-Origin: http://localhost:5098  ← ¡PERMITIDO!
+Access-Control-Allow-Origin: http://localhost:5089  ← ¡PERMITIDO!
 Access-Control-Allow-Methods: GET, POST, PUT, DELETE
 Access-Control-Allow-Headers: *
 Access-Control-Allow-Credentials: true
@@ -227,7 +227,7 @@ Body:
 ### 5. Navegador valida respuesta
 
 ```javascript
-if (response.headers["Access-Control-Allow-Origin"] === "http://localhost:5098") {
+if (response.headers["Access-Control-Allow-Origin"] === "http://localhost:5089") {
   // ✅ Permitido, deja que Blazor acceda al resultado
   return data;
 } else {
@@ -255,7 +255,7 @@ Imagina esto como **seguridad en una discoteca**:
 
 ### Antes (Sin CORS)
 ```
-Frontend: "Hola, soy Blazor del puerto 5098, 
+Frontend: "Hola, soy Blazor del puerto 5089, 
           ¿puedo entrar a la discoteca?"
 
 Seguridad (Navegador): "¿El dueño (Backend) dijo que sí?"
@@ -271,12 +271,12 @@ Frontend no puede entrar.
 
 ### Ahora (Con CORS)
 ```
-Frontend: "Hola, soy Blazor del puerto 5098, 
+Frontend: "Hola, soy Blazor del puerto 5089, 
           ¿puedo entrar a la discoteca?"
 
 Seguridad (Navegador): "¿El dueño (Backend) dijo que sí?"
 
-Backend (responde): "Sí, los de puerto 5098 tienen 
+Backend (responde): "Sí, los de puerto 5089 tienen 
                     permiso de entrada. Aquí está 
                     el pase." ✅
 
@@ -313,7 +313,7 @@ CON CORS incorrecto, podría suceder. 🚨
 
 **Sí, porque:**
 
-1. ✅ Solo permite `localhost:5098` y `localhost:5099`
+1. ✅ Solo permite `localhost:5088` y `localhost:5089`
 2. ✅ Es **desarrollo local**, no producción
 3. ✅ No hay datos sensibles en juego
 4. ✅ La BD está local también
@@ -344,7 +344,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5098", "http://localhost:5099")
+        policy.WithOrigins("http://localhost:5088", "http://localhost:5089")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -370,11 +370,11 @@ app.MapControllers();
 
 | Término | Qué Es | Ejemplo |
 |---------|--------|---------|
-| **Origin** | Protocolo + Dominio + Puerto | `http://localhost:5098` |
+| **Origin** | Protocolo + Dominio + Puerto | `http://localhost:5089` |
 | **CORS** | Política de navegador | Permite cross-origin requests |
 | **Policy** | Conjunto de reglas CORS | `"AllowBlazor"` |
 | **Middleware** | Código que procesa requests | `app.UseCors()` |
-| **WithOrigins** | Especifica qué orígenes permitir | `"http://localhost:5098"` |
+| **WithOrigins** | Especifica qué orígenes permitir | `"http://localhost:5089"` |
 | **AllowAnyMethod** | Permite todos los HTTP verbs | GET, POST, PUT, DELETE, PATCH |
 | **AllowAnyHeader** | Permite todos los headers | Content-Type, Authorization, etc |
 

@@ -49,7 +49,7 @@ Control.pruebas/                               ← RAÍZ DEL PROYECTO
 │  ├─ 🔶 run_all.bat                          ├─ Win batch version
 │  ├─ 🔷 run_api.ps1                          ├─ Solo API (puerto 5088)
 │  ├─ 🔶 run_api.bat                          ├─ Win batch version
-│  ├─ 🔷 run_frontend.ps1                     ├─ Solo Frontend (puerto 5098)
+│  ├─ 🔷 run_frontend.ps1                     ├─ Solo Frontend (puerto 5089)
 │  └─ 🔶 run_frontend.bat                     └─ Win batch version
 │
 ├─ 📁 Api/                                    ← 🌐 API HTTP LAYER

@@ -37,7 +37,7 @@ Write-Host "Ambos servicios iniciados" -ForegroundColor Green
 Write-Host ""
 
 Write-Host "URLs disponibles:" -ForegroundColor Cyan
-Write-Host "   Frontend:  http://localhost:5098" -ForegroundColor Yellow
+Write-Host "   Frontend:  http://localhost:5089" -ForegroundColor Yellow
 Write-Host "   API:       http://localhost:5088" -ForegroundColor Yellow
 Write-Host "   Swagger:   http://localhost:5088/swagger" -ForegroundColor Yellow
 Write-Host ""

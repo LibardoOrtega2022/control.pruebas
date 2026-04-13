@@ -210,7 +210,7 @@ Logging:
   • File - Registro en archivo
 
 CORS:
-  • Frontend autorizado en localhost:5098
+  • Frontend autorizado en localhost:5089
 
 ================================================================================
                         TESTING
