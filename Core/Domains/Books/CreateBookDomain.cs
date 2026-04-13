@@ -29,7 +29,7 @@ public class CreateBookDomain(
             NumberOfPages = request.NumberOfPages,
             AuthorId = request.AuthorId,
             Genre = request.Genre,
-            PublishedDate = request.PublishedDate,
+            PublishedDate = request.PublishedDate ?? DateTime.UtcNow,
             ISBN = request.ISBN,
             CoverImagePath = coverImagePath,
             CreatedDate = DateTime.UtcNow,

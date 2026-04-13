@@ -1,6 +1,7 @@
 @namespace Frontend.Components.Books
 @using Frontend.Models
 @using System.IO
+@using Microsoft.AspNetCore.Components.Forms
 
 <div class="modal-overlay" @onclick="OnCancel">
     <div class="modal-content" @onclick:stopPropagation>
@@ -61,7 +62,7 @@
 
                 <div class="form-group">
                     <label for="image">Portada</label>
-                    <input type="file" id="image" accept="image/*" @onchange="HandleImageSelected" />
+                    <InputFile id="image" accept="image/*" OnChange="HandleImageSelected" />
                     @if (imagePreview != null)
                     {
                         <img src="@imagePreview" alt="Preview" class="image-preview" />
@@ -127,29 +128,28 @@
         }
     }
 
-    private async Task HandleImageSelected(ChangeEventArgs e)
+    private async Task HandleImageSelected(InputFileChangeEventArgs e)
     {
-        var files = (e.Value as Microsoft.AspNetCore.Components.Forms.IBrowserFile[]) ?? Array.Empty<Microsoft.AspNetCore.Components.Forms.IBrowserFile>();
-        if (files.Length > 0)
+        var files = e.GetMultipleFiles();
+        if (files.Count > 0)
         {
             var file = files[0];
             selectedFileName = file.Name;
 
             // Leer el archivo a un MemoryStream que pueda reutilizarse
-            using (var browserStream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024)) // 5MB
-            {
-                var memoryStream = new MemoryStream();
-                await browserStream.CopyToAsync(memoryStream);
-                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
-                selectedImageStream = memoryStream;
+            var browserStream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            var memoryStream = new MemoryStream();
+            await browserStream.CopyToAsync(memoryStream);
+            browserStream.Dispose();
+            memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+            selectedImageStream = memoryStream;
 
-                // Crear preview
-                var buffer = new byte[memoryStream.Length];
-                await memoryStream.ReadAsync(buffer);
-                var base64 = Convert.ToBase64String(buffer);
-                imagePreview = $"data:image/png;base64,{base64}";
-                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
-            }
+            // Crear preview
+            var buffer = new byte[memoryStream.Length];
+            await memoryStream.ReadAsync(buffer);
+            var base64 = Convert.ToBase64String(buffer);
+            imagePreview = $"data:image/png;base64,{base64}";
+            memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
         }
     }
 
