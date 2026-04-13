@@ -28,7 +28,7 @@ public class CreateBookDomain(
             Title = request.Title,
             NumberOfPages = request.NumberOfPages,
             AuthorId = request.AuthorId,
-            Genre = request.Genre,
+            Genre = request.Genre ?? "Indefinido",
             PublishedDate = request.PublishedDate ?? DateTime.UtcNow,
             ISBN = request.ISBN,
             CoverImagePath = coverImagePath,
